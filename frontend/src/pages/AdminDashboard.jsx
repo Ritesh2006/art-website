@@ -96,22 +96,34 @@ export default function AdminDashboard() {
   };
 
   const toggleArtworkAvailability = async (id, isAvailable) => {
+    const targetArt = artworks.find(a => a.id === id);
+    console.group('🛠️ Artwork Status Update Debugging');
+    console.log('Sending ID to Backend:', id);
+    console.log('Target Status:', isAvailable ? 'Available' : 'Sold');
+    if (targetArt) console.table(targetArt);
+    console.groupEnd();
+
+    if (!id) {
+        showToast('Error: Artwork ID is missing!');
+        return;
+    }
+
     // Optimistic update — reflect change instantly in UI
     setArtworks(prev => prev.map(a => a.id === id ? { ...a, available: isAvailable } : a));
     try {
-      await axios.put(
+      const res = await axios.put(
         `${API_BASE}/admin/artworks/${id}/availability`,
         { available: isAvailable },
         { headers: getAdminHeader() }
       );
       showToast(`Marked as ${isAvailable ? '✅ Available' : '🔴 Sold Out'}`);
-      // Refresh all data to ensure stats are in sync
       fetchArtworks();
       fetchStats(); 
-    } catch {
+    } catch (err) {
+      console.error('SERVER ERROR DETAILS:', err.response?.data);
       // Revert on failure
       setArtworks(prev => prev.map(a => a.id === id ? { ...a, available: !isAvailable } : a));
-      showToast('Update failed — please check backend status');
+      showToast(`Update failed: ${err.response?.data?.detail || err.message}`);
     }
   };
 

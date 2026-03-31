@@ -428,7 +428,11 @@ async def delete_artwork(artwork_id: str, admin: bool = Depends(get_admin)):
 
 @app.put("/admin/artworks/{artwork_id}/availability")
 async def update_artwork_availability(artwork_id: str, data: AvailabilityUpdate, admin: bool = Depends(get_admin)):
-    result = await db.artworks.update_one({"id": artwork_id}, {"$set": {"available": data.available}})
+    # Search by both custom 'id' and MongoDB '_id' for robustness
+    result = await db.artworks.update_one(
+        {"$or": [{"id": artwork_id}, {"_id": artwork_id}]}, 
+        {"$set": {"available": data.available}}
+    )
     if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Artwork not found")
+        raise HTTPException(status_code=404, detail=f"Artwork with ID {artwork_id} not found in database")
     return {"message": f"Artwork marked as {'available' if data.available else 'sold'}"}
