@@ -1,0 +1,102 @@
+/* UserDashboard.css */
+
+.dashboard-root {
+  min-height: 100vh;
+  background-color: #0a0a0c;
+  color: #f5f0e8;
+  font-family: 'Inter', sans-serif;
+  padding: 60px var(--space-lg);
+  background-image: radial-gradient(circle at 10% 20%, rgba(201, 168, 76, 0.04) 0%, transparent 40%);
+  letter-spacing: -0.01em;
+}
+
+.welcome-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: var(--h1-size);
+  font-weight: 300;
+  margin: 0;
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+}
+
+.welcome-title span {
+  font-style: italic;
+  color: var(--gold);
+  font-weight: 400;
+}
+
+.db-grid {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr;
+  gap: var(--space-lg);
+  margin-top: 40px;
+}
+
+.order-card {
+  background: linear-gradient(145deg, #141417 0%, #0d0d0f 100%);
+  border: 1px solid rgba(201, 168, 76, 0.15);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+  position: relative;
+  transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+  overflow-x: hidden;
+}
+
+.order-card:hover {
+  border-color: rgba(201, 168, 76, 0.5);
+  transform: translateY(-5px);
+}
+
+.profile-panel {
+  background: #141417;
+  border-left: 3px solid var(--gold);
+  padding: var(--space-md);
+  position: sticky;
+  top: 100px;
+  height: fit-content;
+}
+
+/* Mobile Breakpoints */
+@media (max-width: 1024px) {
+  .db-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-root {
+    padding: 100px 1.5rem 40px;
+  }
+  
+  .db-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+  
+  .welcome-title {
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .welcome-title {
+    font-size: 2.2rem;
+  }
+  
+  .order-card {
+    padding: 1.5rem;
+  }
+  
+  .timeline-steps {
+    gap: 5px;
+  }
+  
+  .step-label {
+    font-size: 7px;
+    letter-spacing: 0.05em;
+  }
+  
+  .step-node {
+    width: 32px;
+    height: 32px;
+  }
+}
