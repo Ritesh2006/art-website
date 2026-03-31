@@ -90,6 +90,23 @@ export default function AdminDashboard() {
     } catch { showToast('Delete failed'); }
   };
 
+  const toggleArtworkAvailability = async (id, isAvailable) => {
+    // Optimistic update — reflect change instantly in UI
+    setArtworks(prev => prev.map(a => a.id === id ? { ...a, available: isAvailable } : a));
+    try {
+      await axios.put(
+        `${API_BASE}/admin/artworks/${id}/availability`,
+        { available: isAvailable },
+        { headers: getAdminHeader() }
+      );
+      showToast(`Marked as ${isAvailable ? '✅ Available' : '🔴 Sold Out'}`);
+    } catch {
+      // Revert on failure
+      setArtworks(prev => prev.map(a => a.id === id ? { ...a, available: !isAvailable } : a));
+      showToast('Update failed — please try again');
+    }
+  };
+
   const toggleSettings = async () => {
     try {
       const newStatus = !settings.is_taking_orders;
@@ -427,9 +444,14 @@ export default function AdminDashboard() {
                           <td>{art.category}</td>
                           <td>₹{art.price?.toLocaleString('en-IN')}</td>
                           <td>
-                            <span className={`status-badge ${art.available ? 'available' : 'sold'}`}>
-                              {art.available ? 'Available' : 'Sold'}
-                            </span>
+                            <select 
+                              className={`status-select ${art.available ? 'available' : 'sold'}`}
+                              value={art.available ? 'available' : 'sold'}
+                              onChange={(e) => toggleArtworkAvailability(art.id, e.target.value === 'available')}
+                            >
+                              <option value="available">Available</option>
+                              <option value="sold">Sold Out</option>
+                            </select>
                           </td>
                           <td>
                             <button className="delete-btn" onClick={() => deleteArtwork(art.id)}>Delete</button>

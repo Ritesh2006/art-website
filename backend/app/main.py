@@ -60,6 +60,9 @@ class OrderStatusUpdate(BaseModel):
 class SettingsUpdate(BaseModel):
     is_taking_orders: bool
 
+class AvailabilityUpdate(BaseModel):
+    available: bool
+
 class UserCreate(BaseModel):
     name: str
     email: str
@@ -404,3 +407,10 @@ async def delete_artwork(artwork_id: str, admin: bool = Depends(get_admin)):
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Artwork not found")
     return {"message": "Artwork deleted successfully"}
+
+@app.put("/admin/artworks/{artwork_id}/availability")
+async def update_artwork_availability(artwork_id: str, data: AvailabilityUpdate, admin: bool = Depends(get_admin)):
+    result = await db.artworks.update_one({"id": artwork_id}, {"$set": {"available": data.available}})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Artwork not found")
+    return {"message": f"Artwork marked as {'available' if data.available else 'sold'}"}
