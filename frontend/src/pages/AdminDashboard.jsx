@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Package, CheckCircle, Clock, Truck, XCircle, LogOut, Check, LayoutDashboard, Brush, ShoppingBag } from 'lucide-react';
+import { Package, CheckCircle, Clock, Truck, XCircle, LogOut, Check, LayoutDashboard, Brush, ShoppingBag, CloudCog } from 'lucide-react';
 import { validateRequired, validatePrice, validateImageFile } from '../utils/formValidation';
 import '../styles/AdminDashboard.css';
 
@@ -60,14 +60,14 @@ export default function AdminDashboard() {
   };
 
   const fetchSettings = async () => {
-    try { const res = await axios.get(`${API_BASE}/settings`); setSettings(res.data); } catch {}
+    try { const res = await axios.get(`${API_BASE}/settings`); setSettings(res.data); } catch { }
   };
 
   const fetchStats = async () => {
     try {
       const res = await axios.get(`${API_BASE}/stats`);
       setStatData(prev => ({ ...prev, artworks: res.data.total_artworks || 0 }));
-    } catch {}
+    } catch { }
   };
 
   const fetchOrders = async () => {
@@ -96,6 +96,8 @@ export default function AdminDashboard() {
   };
 
   const toggleArtworkAvailability = async (id, isAvailable) => {
+    console.log("id", id);
+    console.log("isAvailable", isAvailable);
     const targetArt = artworks.find(a => a.id === id);
     console.group('🛠️ Artwork Status Update Debugging');
     console.log('Sending ID to Backend:', id);
@@ -104,8 +106,8 @@ export default function AdminDashboard() {
     console.groupEnd();
 
     if (!id) {
-        showToast('Error: Artwork ID is missing!');
-        return;
+      showToast('Error: Artwork ID is missing!');
+      return;
     }
 
     // Optimistic update — reflect change instantly in UI
@@ -116,9 +118,10 @@ export default function AdminDashboard() {
         { available: isAvailable },
         { headers: getAdminHeader() }
       );
+      console.log("==================================", res);
       showToast(`Marked as ${isAvailable ? '✅ Available' : '🔴 Sold Out'}`);
       fetchArtworks();
-      fetchStats(); 
+      fetchStats();
     } catch (err) {
       console.error('SERVER ERROR DETAILS:', err.response?.data);
       // Revert on failure
@@ -167,20 +170,20 @@ export default function AdminDashboard() {
 
   const statusIcon = (s) => {
     switch (s?.toLowerCase()) {
-      case 'confirmed':  return <Clock size={14} color="#3b82f6" />;
+      case 'confirmed': return <Clock size={14} color="#3b82f6" />;
       case 'processing': return <Package size={14} color="#f97316" />;
-      case 'shipped':    return <Truck size={14} color="#10b981" />;
-      case 'delivered':  return <CheckCircle size={14} color="#10b981" />;
-      case 'cancelled':  return <XCircle size={14} color="#ef4444" />;
-      default:           return <Package size={14} />;
+      case 'shipped': return <Truck size={14} color="#10b981" />;
+      case 'delivered': return <CheckCircle size={14} color="#10b981" />;
+      case 'cancelled': return <XCircle size={14} color="#ef4444" />;
+      default: return <Package size={14} />;
     }
   };
 
   /* ── NAV ITEMS ── */
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
-    { id: 'orders',    label: 'Orders',    icon: <ShoppingBag size={18} /> },
-    { id: 'artworks',  label: 'Artworks',  icon: <Brush size={18} /> },
+    { id: 'orders', label: 'Orders', icon: <ShoppingBag size={18} /> },
+    { id: 'artworks', label: 'Artworks', icon: <Brush size={18} /> },
   ];
 
   if (!isAuthenticated) {
@@ -285,7 +288,7 @@ export default function AdminDashboard() {
               <div className="admin-stats-grid">
                 {[
                   { label: 'Revenue', value: `₹${statData.revenue?.toLocaleString('en-IN') || 0}` },
-                  { label: 'Orders',  value: statData.totalOrders || 0 },
+                  { label: 'Orders', value: statData.totalOrders || 0 },
                   { label: 'Available Art', value: artworks.filter(a => a.available).length, accent: true },
                   { label: 'Total Stock', value: artworks.length },
                 ].map(s => (
@@ -367,12 +370,12 @@ export default function AdminDashboard() {
                 <form onSubmit={handleAddArtwork} className="artwork-form">
                   <div className="form-field">
                     <label>Title *</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       id="artwork-title-input"
                       placeholder="e.g., Whispers of the Soul"
-                      value={newArt.title} 
-                      onChange={e => setNewArt({ ...newArt, title: e.target.value })} 
+                      value={newArt.title}
+                      onChange={e => setNewArt({ ...newArt, title: e.target.value })}
                       required
                     />
                   </div>
@@ -424,9 +427,9 @@ export default function AdminDashboard() {
                 <div className="admin-card-header">
                   <h2 className="admin-card-title">Existing Artworks</h2>
                   <div className="admin-card-actions">
-                    <select 
-                      className="status-select" 
-                      value={artFilter} 
+                    <select
+                      className="status-select"
+                      value={artFilter}
                       onChange={e => setArtFilter(e.target.value)}
                     >
                       <option value="all">All Status</option>
@@ -463,32 +466,32 @@ export default function AdminDashboard() {
                           return true;
                         })
                         .map(art => (
-                        <tr key={art.id}>
-                          <td>
-                            <img src={art.image_url} alt={art.title} className="art-thumb" />
-                          </td>
-                          <td style={{ cursor: 'pointer' }}>
-                            <div className="td-name">{art.title}</div>
-                            <div className="td-sub">{art.size}</div>
-                          </td>
-                          <td>{art.category}</td>
-                          <td>₹{art.price?.toLocaleString('en-IN')}</td>
-                          <td>
-                            <select 
-                              className={`status-select ${art.available ? 'available' : 'sold'}`}
-                              value={art.available ? 'available' : 'sold'}
-                              onChange={(e) => toggleArtworkAvailability(art.id, e.target.value === 'available')}
-                              style={{ borderLeft: `4px solid ${art.available ? '#10b981' : '#ef4444'}` }}
-                            >
-                              <option value="available">🟢 Available</option>
-                              <option value="sold">🔴 Sold Out</option>
-                            </select>
-                          </td>
-                          <td>
-                            <button className="delete-btn" onClick={() => deleteArtwork(art.id)}>Delete</button>
-                          </td>
-                        </tr>
-                      ))}
+                          <tr key={art.id}>
+                            <td>
+                              <img src={art.image_url} alt={art.title} className="art-thumb" />
+                            </td>
+                            <td style={{ cursor: 'pointer' }}>
+                              <div className="td-name">{art.title}</div>
+                              <div className="td-sub">{art.size}</div>
+                            </td>
+                            <td>{art.category}</td>
+                            <td>₹{art.price?.toLocaleString('en-IN')}</td>
+                            <td>
+                              <select
+                                className={`status-select ${art.available ? 'available' : 'sold'}`}
+                                value={art.available ? 'available' : 'sold'}
+                                onChange={(e) => toggleArtworkAvailability(art.id, e.target.value === 'available')}
+                                style={{ borderLeft: `4px solid ${art.available ? '#10b981' : '#ef4444'}` }}
+                              >
+                                <option value="available">🟢 Available</option>
+                                <option value="sold">🔴 Sold Out</option>
+                              </select>
+                            </td>
+                            <td>
+                              <button className="delete-btn" onClick={() => deleteArtwork(art.id)}>Delete</button>
+                            </td>
+                          </tr>
+                        ))}
                     </tbody>
                   </table>
                 </div>
