@@ -80,8 +80,11 @@
   font-size: 1.6rem;
   font-weight: 700;
   color: var(--ivory);
-  margin-bottom: 2.5rem;
-  padding-left: 0.5rem;
+  margin-bottom: 2.8rem;
+  padding: 0.5rem;
+  display: block;
+  z-index: 10;
+  position: relative;
 }
 .admin-logo span { color: var(--gold); }
 
@@ -124,8 +127,8 @@
 }
 
 /* Mobile header & tabs — HIDDEN on desktop */
-.admin-mobile-header { display: none; }
-.admin-mobile-tabs   { display: none; }
+.admin-mobile-header { display: none !important; }
+.admin-mobile-tabs   { display: none !important; }
 
 /* ════ MAIN ════ */
 .admin-main {
