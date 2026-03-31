@@ -3,13 +3,11 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
 import AdminDashboard from './pages/AdminDashboard';
 import UserDashboard from './pages/UserDashboard';
-import CustomCursor from './components/CustomCursor';
 
 export default function App() {
   return (
     //  hello
     <BrowserRouter>
-      <CustomCursor />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/admin" element={<AdminDashboard />} />
