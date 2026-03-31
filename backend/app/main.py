@@ -228,7 +228,10 @@ async def create_order(order: Order, background_tasks: BackgroundTasks):
     
     # [NEW] Automate "Sold" status for purchased artworks
     for item in order.items:
-        await db.artworks.update_one({"id": item.artwork_id}, {"$set": {"available": False}})
+        await db.artworks.update_one(
+            {"$or": [{"id": item.artwork_id}, {"_id": item.artwork_id}]}, 
+            {"$set": {"available": False}}
+        )
     
     background_tasks.add_task(email_service.send_order_confirmation, order.email, order_id, order.name, order.total)
     
