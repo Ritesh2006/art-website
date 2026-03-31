@@ -262,7 +262,10 @@
   background: white;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-weight: 500;
+  outline: none;
 }
+.status-select:hover { border-color: var(--gold); }
 .status-select.available { color: #10b981; border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.03); }
 .status-select.sold      { color: #ef4444; border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.03); }
 .status-select:focus { outline: none; border-color: var(--gold); }

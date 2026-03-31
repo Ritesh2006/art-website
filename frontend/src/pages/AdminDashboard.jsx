@@ -466,9 +466,10 @@ export default function AdminDashboard() {
                               className={`status-select ${art.available ? 'available' : 'sold'}`}
                               value={art.available ? 'available' : 'sold'}
                               onChange={(e) => toggleArtworkAvailability(art.id, e.target.value === 'available')}
+                              style={{ borderLeft: `4px solid ${art.available ? '#10b981' : '#ef4444'}` }}
                             >
-                              <option value="available">Available</option>
-                              <option value="sold">Sold Out</option>
+                              <option value="available">🟢 Available</option>
+                              <option value="sold">🔴 Sold Out</option>
                             </select>
                           </td>
                           <td>
