@@ -7,7 +7,7 @@ import CustomCursor from './components/CustomCursor';
 
 export default function App() {
   return (
-    // lo9kij7hy
+    //  hello
     <BrowserRouter>
       <CustomCursor />
       <Routes>
