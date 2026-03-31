@@ -15,8 +15,13 @@ class EmailService:
         self.from_display_name = "Ritesh Rakshit Art"
 
     def _send_email(self, to_email: str, subject: str, html_content: str, text_content: str):
+        # [PROD SAFETY] Guard against missing or empty to_email
+        if not to_email or not to_email.strip():
+            print("SKIPPING: Recipient email is missing or empty.")
+            return
+
         if not all([self.smtp_user, self.smtp_pass]):
-            print(f"Skipping email to {to_email}: SMTP credentials missing.")
+            print(f"SKIPPING: SMTP credentials missing for {to_email}.")
             return
 
         msg = MIMEMultipart("alternative")
@@ -28,19 +33,22 @@ class EmailService:
         msg.attach(MIMEText(html_content, "html"))
 
         try:
-            # Selection between SSL and STARTTLS based on port
+            # Smart Port Handling (SSL on 465, STARTTLS on others)
             if self.smtp_port == 465:
-                # Direct SSL/TLS
-                server = smtplib.SMTP_SSL(self.smtp_server, self.smtp_port, timeout=10)
+                # Direct SSL/TLS — Recommended for Gmail in Prod
+                with smtplib.SMTP_SSL(self.smtp_server, self.smtp_port, timeout=15) as server:
+                    server.login(self.smtp_user, self.smtp_pass)
+                    server.send_message(msg)
             else:
-                # STARTTLS
-                server = smtplib.SMTP(self.smtp_server, self.smtp_port, timeout=10)
-                server.starttls()
+                # STARTTLS (Port 587 or others)
+                with smtplib.SMTP(self.smtp_server, self.smtp_port, timeout=15) as server:
+                    server.starttls()
+                    server.login(self.smtp_user, self.smtp_pass)
+                    server.send_message(msg)
             
-            with server:
-                server.login(self.smtp_user, self.smtp_pass)
-                server.send_message(msg)
-            print(f"SUCCESS: Email sent to {to_email}")
+            print(f"SUCCESS: Email sent successfully to {to_email}")
+        except smtplib.SMTPAuthenticationError:
+             print(f"ERROR: Authentication failed for {self.smtp_user}. Double check App Password.")
         except Exception as e:
             print(f"ERROR: Failed to send email to {to_email}: {str(e)}")
 
