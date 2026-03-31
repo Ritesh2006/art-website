@@ -6,3 +6,4 @@ python-dotenv>=1.0.0
 motor>=3.3.0
 cloudinary>=1.36.0
 python-multipart>=0.0.6
+# Force rebuild trigger: 2026-03-31 20:35
