@@ -23,10 +23,15 @@ export default function CustomCursor() {
       const isClickable = 
         e.target.tagName?.toLowerCase() === 'a' ||
         e.target.tagName?.toLowerCase() === 'button' ||
+        e.target.tagName?.toLowerCase() === 'input' ||
+        e.target.tagName?.toLowerCase() === 'textarea' ||
+        e.target.tagName?.toLowerCase() === 'select' ||
         e.target.closest?.('a') !== null ||
         e.target.closest?.('button') !== null ||
         e.target.classList?.contains('artwork-card') ||
-        e.target.classList?.contains('cat-card');
+        e.target.classList?.contains('cat-card') ||
+        e.target.classList?.contains('td-name') ||
+        e.target.classList?.contains('admin-nav-btn');
         
       setIsHovering(isClickable);
     };
@@ -62,8 +67,7 @@ export default function CustomCursor() {
           borderRadius: '50%',
           pointerEvents: 'none',
           zIndex: 9999,
-          mixBlendMode: 'difference',
-          backdropFilter: isHovering ? 'blur(2px)' : 'none'
+          mixBlendMode: 'difference'
         }}
       />
       

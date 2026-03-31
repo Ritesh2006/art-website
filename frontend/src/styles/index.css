@@ -56,9 +56,12 @@ body{
   letter-spacing:0.02em;
 }
 
-/* Hide default cursor to use Framer Motion custom cursor */
-body, a, button, input, select, textarea {
+/* Hide default cursor for general elements, but keep it for inputs for better UX */
+body, a, button {
   cursor: none !important;
+}
+input, textarea, select {
+  cursor: auto !important; /* Restore for text fields so user can see I-beam */
 }
 /* Grain overlay */
 body::before{

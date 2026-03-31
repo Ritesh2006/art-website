@@ -16,6 +16,7 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState([]);
   const [artworks, setArtworks] = useState([]);
   const [page, setPage] = useState(1);
+  const [artFilter, setArtFilter] = useState('all');
   const [isUploading, setIsUploading] = useState(false);
   const [newArt, setNewArt] = useState({
     title: '', category: 'charcoal', medium: '',
@@ -319,8 +320,14 @@ export default function AdminDashboard() {
                 <form onSubmit={handleAddArtwork} className="artwork-form">
                   <div className="form-field">
                     <label>Title *</label>
-                    <input type="text" placeholder="e.g., Whispers of the Soul"
-                      value={newArt.title} onChange={e => setNewArt({ ...newArt, title: e.target.value })} />
+                    <input 
+                      type="text" 
+                      id="artwork-title-input"
+                      placeholder="e.g., Whispers of the Soul"
+                      value={newArt.title} 
+                      onChange={e => setNewArt({ ...newArt, title: e.target.value })} 
+                      required
+                    />
                   </div>
                   <div className="form-field">
                     <label>Category *</label>
@@ -367,7 +374,20 @@ export default function AdminDashboard() {
 
               {/* Artworks table */}
               <div className="admin-card">
-                <h2 className="admin-card-title">Existing Artworks</h2>
+                <div className="admin-card-header">
+                  <h2 className="admin-card-title">Existing Artworks</h2>
+                  <div className="admin-card-actions">
+                    <select 
+                      className="status-select" 
+                      value={artFilter} 
+                      onChange={e => setArtFilter(e.target.value)}
+                    >
+                      <option value="all">All Status</option>
+                      <option value="available">Available</option>
+                      <option value="sold">Sold Out</option>
+                    </select>
+                  </div>
+                </div>
                 <div className="table-scroll">
                   <table className="admin-table">
                     <thead>
@@ -381,14 +401,26 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                      {artworks.length === 0 ? (
-                        <tr><td colSpan="6" className="table-empty">No artworks found</td></tr>
-                      ) : artworks.map(art => (
+                      {artworks
+                        .filter(art => {
+                          if (artFilter === 'available') return art.available;
+                          if (artFilter === 'sold') return !art.available;
+                          return true;
+                        })
+                        .length === 0 ? (
+                        <tr><td colSpan="6" className="table-empty">No artworks match the filter</td></tr>
+                      ) : artworks
+                        .filter(art => {
+                          if (artFilter === 'available') return art.available;
+                          if (artFilter === 'sold') return !art.available;
+                          return true;
+                        })
+                        .map(art => (
                         <tr key={art.id}>
                           <td>
                             <img src={art.image_url} alt={art.title} className="art-thumb" />
                           </td>
-                          <td>
+                          <td style={{ cursor: 'pointer' }}>
                             <div className="td-name">{art.title}</div>
                             <div className="td-sub">{art.size}</div>
                           </td>
