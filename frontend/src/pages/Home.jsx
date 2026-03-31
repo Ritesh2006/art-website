@@ -163,6 +163,8 @@ export default function Home() {
       setCart([]);
       setIsCheckoutOpen(false);
       showToast(`Order #${res.data.order_id} confirmed!`);
+      // Refresh local state immediately
+      fetchArtworks();
     } catch (e) { showToast('Error placing order'); }
   };
 

@@ -13,6 +13,7 @@ import cloudinary.uploader
 from fastapi import UploadFile, File, Form
 from app.services.email_service import EmailService
 from dotenv import load_dotenv
+from bson import ObjectId
 
 load_dotenv()
 
@@ -228,10 +229,15 @@ async def create_order(order: Order, background_tasks: BackgroundTasks):
     
     # [NEW] Automate "Sold" status for purchased artworks
     for item in order.items:
-        await db.artworks.update_one(
-            {"$or": [{"id": item.artwork_id}, {"_id": item.artwork_id}]}, 
-            {"$set": {"available": False}}
-        )
+        # Robust ID matching with ObjectId support
+        query = {"$or": [{"id": item.artwork_id}]}
+        try:
+             # Try to see if it qualifies as an ObjectId
+             if len(item.artwork_id) == 24:
+                 query["$or"].append({"_id": ObjectId(item.artwork_id)})
+        except: pass
+        
+        await db.artworks.update_one(query, {"$set": {"available": False}})
     
     background_tasks.add_task(email_service.send_order_confirmation, order.email, order_id, order.name, order.total)
     
