@@ -28,13 +28,21 @@ class EmailService:
         msg.attach(MIMEText(html_content, "html"))
 
         try:
-            with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
+            # Selection between SSL and STARTTLS based on port
+            if self.smtp_port == 465:
+                # Direct SSL/TLS
+                server = smtplib.SMTP_SSL(self.smtp_server, self.smtp_port, timeout=10)
+            else:
+                # STARTTLS
+                server = smtplib.SMTP(self.smtp_server, self.smtp_port, timeout=10)
                 server.starttls()
+            
+            with server:
                 server.login(self.smtp_user, self.smtp_pass)
                 server.send_message(msg)
-            print(f"Email sent successfully to {to_email}")
+            print(f"SUCCESS: Email sent to {to_email}")
         except Exception as e:
-            print(f"Failed to send email to {to_email}: {str(e)}")
+            print(f"ERROR: Failed to send email to {to_email}: {str(e)}")
 
     def send_order_confirmation(self, to_email: str, order_id: str, name: str, total: float):
         subject = f"Order Confirmed! - #{order_id}"
