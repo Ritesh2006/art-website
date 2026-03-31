@@ -8,6 +8,7 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://backend-3o9b.onre
 
 export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [toast, setToast] = useState('');
   const [activeView, setActiveView] = useState('dashboard');
@@ -40,8 +41,12 @@ export default function AdminDashboard() {
 
   const login = async (e) => {
     e.preventDefault();
+    if (email !== 'riteshrakhit2006@gmail.com') {
+      window.alert('⚠️ Access Denied: Only riteshrakhit2006@gmail.com is authorized to access the Admin Panel.');
+      return;
+    }
     try {
-      const res = await axios.post(`${API_BASE}/admin/login`, { password });
+      const res = await axios.post(`${API_BASE}/admin/login`, { email, password });
       setIsAuthenticated(true);
       localStorage.setItem('admin_token', res.data.token);
       showToast('Authenticated successfully');
@@ -100,10 +105,13 @@ export default function AdminDashboard() {
         { headers: getAdminHeader() }
       );
       showToast(`Marked as ${isAvailable ? '✅ Available' : '🔴 Sold Out'}`);
+      // Refresh all data to ensure stats are in sync
+      fetchArtworks();
+      fetchStats(); 
     } catch {
       // Revert on failure
       setArtworks(prev => prev.map(a => a.id === id ? { ...a, available: !isAvailable } : a));
-      showToast('Update failed — please try again');
+      showToast('Update failed — please check backend status');
     }
   };
 
@@ -169,11 +177,20 @@ export default function AdminDashboard() {
         <form onSubmit={login} className="admin-login-card glass-panel">
           <h2 className="admin-login-title">Admin Portal</h2>
           <input
+            type="email"
+            placeholder="Admin Email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            className="admin-login-input"
+            required
+          />
+          <input
             type="password"
             placeholder="Password"
             value={password}
             onChange={e => setPassword(e.target.value)}
             className="admin-login-input"
+            required
           />
           <button type="submit" className="admin-login-btn">Authenticate</button>
         </form>
@@ -257,7 +274,8 @@ export default function AdminDashboard() {
                 {[
                   { label: 'Revenue', value: `₹${statData.revenue?.toLocaleString('en-IN') || 0}` },
                   { label: 'Orders',  value: statData.totalOrders || 0 },
-                  { label: 'Artworks', value: statData.artworks || 0, accent: true },
+                  { label: 'Available Art', value: artworks.filter(a => a.available).length, accent: true },
+                  { label: 'Total Stock', value: artworks.length },
                 ].map(s => (
                   <div key={s.label} className={`admin-stat-card ${s.accent ? 'accent' : ''}`}>
                     <div className="stat-label">{s.label}</div>

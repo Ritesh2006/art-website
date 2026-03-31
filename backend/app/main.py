@@ -73,6 +73,7 @@ class UserLogin(BaseModel):
     password: str
 
 class AdminLogin(BaseModel):
+    email: str
     password: str
 
 class NewsletterSignup(BaseModel):
@@ -96,6 +97,17 @@ if CLOUDINARY_CLOUD_NAME:
     )
 
 ADMIN_SECRET = os.getenv("ADMIN_SECRET", "ritesh_art_vault_2024")
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "riteshrakhit2006@gmail.com")
+
+# Temp mail domain list (sample)
+TEMP_MAIL_DOMAINS = [
+    "temp-mail.org", "guerrillamail.com", "10minutemail.com", 
+    "mailinator.com", "yopmail.com", "tempmail.net"
+]
+
+def is_temp_email(email: str) -> bool:
+    domain = email.split("@")[-1].lower()
+    return domain in TEMP_MAIL_DOMAINS
 
 async def get_admin(authorization: str = Header(None)):
     if not authorization or not authorization.startswith("Bearer "):
@@ -229,6 +241,9 @@ async def send_message(msg: ContactMessage):
 
 @app.post("/auth/signup")
 async def signup(user: UserCreate, background_tasks: BackgroundTasks):
+    if is_temp_email(user.email):
+        raise HTTPException(status_code=400, detail="Temporary emails are not allowed.")
+        
     existing_user = await db.users.find_one({"email": user.email})
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -293,9 +308,12 @@ async def get_settings():
 
 @app.post("/admin/login")
 async def admin_login(creds: AdminLogin):
-    if creds.password == ADMIN_SECRET:
+    if is_temp_email(creds.email):
+         raise HTTPException(status_code=400, detail="Temporary emails are not allowed.")
+
+    if creds.email == ADMIN_EMAIL and creds.password == ADMIN_SECRET:
         return {"token": ADMIN_SECRET, "message": "Authenticated"}
-    raise HTTPException(status_code=401, detail="Invalid admin password")
+    raise HTTPException(status_code=401, detail="Invalid admin credentials")
 
 @app.put("/admin/settings")
 async def update_settings(update: SettingsUpdate, admin: bool = Depends(get_admin)):
