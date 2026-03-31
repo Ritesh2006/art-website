@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends, Header, status
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends, Header, status, Body
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
@@ -436,12 +436,17 @@ async def delete_artwork(artwork_id: str, admin: bool = Depends(get_admin)):
     return {"message": "Artwork deleted successfully"}
 
 @app.put("/admin/artworks/{artwork_id}/availability")
-async def update_artwork_availability(artwork_id: str, data: AvailabilityUpdate, admin: bool = Depends(get_admin)):
+async def update_artwork_availability(artwork_id: str, data: AvailabilityUpdate = Body(...), admin: bool = Depends(get_admin)):
     # Search by both custom 'id' and MongoDB '_id' for robustness
-    result = await db.artworks.update_one(
-        {"$or": [{"id": artwork_id}, {"_id": artwork_id}]}, 
-        {"$set": {"available": data.available}}
-    )
+    query = {"$or": [{"id": artwork_id}]}
+    try:
+         # Try to see if it qualifies as an ObjectId
+         if len(artwork_id) == 24:
+             query["$or"].append({"_id": ObjectId(artwork_id)})
+    except: pass
+    
+    result = await db.artworks.update_one(query, {"$set": {"available": data.available}})
+    
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail=f"Artwork with ID {artwork_id} not found in database")
     return {"message": f"Artwork marked as {'available' if data.available else 'sold'}"}
