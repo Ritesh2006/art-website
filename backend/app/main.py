@@ -179,7 +179,7 @@ async def shutdown_event():
 
 @app.get("/")
 def root():
-    return {"message": "Ritesh Rakshit Art Gallery API", "version": "1.0.0"}
+    return {"message": "Ritesh Rakshit Art Gallery API", "version": "1.1.0", "status": "Ready", "update": "Availability Toggle Active"}
 
 @app.get("/artworks")
 async def get_artworks(category: Optional[str] = None, featured: Optional[bool] = None, available: Optional[bool] = None):
